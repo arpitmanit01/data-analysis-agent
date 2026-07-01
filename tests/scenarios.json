@@ -1,0 +1,37 @@
+[
+  {
+    "name": "top_region_by_revenue",
+    "csv": "tests/data/sales.csv",
+    "query": "Which region has the highest total order_value?",
+    "expect_keywords": ["region", "north", "total"],
+    "pass_threshold": 0.5
+  },
+  {
+    "name": "avg_order_value_by_segment",
+    "csv": "tests/data/sales.csv",
+    "query": "What is the average order_value per customer_segment?",
+    "expect_keywords": ["corporate", "average", "segment"],
+    "pass_threshold": 0.5
+  },
+  {
+    "name": "best_selling_category_by_quantity",
+    "csv": "tests/data/sales.csv",
+    "query": "Which category sold the most units by total quantity?",
+    "expect_keywords": ["office supplies", "quantity", "category"],
+    "pass_threshold": 0.5
+  },
+  {
+    "name": "monthly_revenue_trend",
+    "csv": "tests/data/sales.csv",
+    "query": "Compare total order_value between January and February.",
+    "expect_keywords": ["january", "february", "order_value"],
+    "pass_threshold": 0.5
+  },
+  {
+    "name": "ambiguous_needs_clarification",
+    "csv": "tests/data/sales.csv",
+    "query": "Show me the best performance.",
+    "should_clarify": true,
+    "pass_threshold": 1.0
+  }
+]
