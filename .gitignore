@@ -1,3 +1,8 @@
+# Copilot local planning & memory (never commit)
+.copilot/
+# Copilot instructions / config (never commit)
+.github/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -156,6 +161,15 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# temp
+temp
+
+# Agent runtime artifacts
+artifacts/
+*.sqlite3
+.agent_memory.sqlite3
+eval_results.json
 
 # Spyder project settings
 .spyderproject
