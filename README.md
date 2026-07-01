@@ -1,140 +1,98 @@
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/banner-light.svg">
+  <img alt="Data Analysis Agent" src="docs/assets/banner-light.svg" width="720">
+</picture>
+
 # Data Analysis Agent
 
-An **agentic AI** application that accepts a CSV, asks clarifying questions when
-a request is ambiguous, **generates analysis code, executes it in a sandbox, and
-returns data-grounded insights**. Built with **LangGraph + LangChain** on an
-Azure AI Foundry (OpenAI-compatible) endpoint.
+**Chat with your CSV.** Ask a question in plain English — the agent profiles your
+data, asks for clarification when needed, writes and runs the analysis code, and
+hands back clear, data-grounded insights.
 
-> Domain: *Data Analysis agent* (from the assignment's domain options).
+</div>
 
-## Why this design
+---
 
-Data analysis is a natural fit for an agent loop: the "right" analysis is often
-under-specified, code must be **written and executed** (a real tool call), and
-results must be **critiqued** before being trusted. This project models that as
-a small team of specialist agents coordinated by a planner, so each concern
-(routing, clarification, code, synthesis) has a focused prompt and is
-independently testable.
+## What it does
 
-## Architecture
+- 📊 **Upload a CSV, ask a question** — no SQL or pandas required.
+- 🤔 **Asks smart clarifying questions** when your request is ambiguous.
+- 🧑‍💻 **Writes and executes analysis code** for you, then double-checks its own work.
+- 💡 **Returns insights, caveats, and charts** — not just raw numbers.
+- 🖥️ **CLI or web UI**, with a live view of the agent's reasoning.
 
-Multi-agent **LangGraph** state machine implementing
-`reason → plan → act → observe → respond`, with a **Planner** delegating to
-specialists and a **self-reflection** (critic) loop around code execution.
+## Quickstart
 
-```mermaid
-flowchart TD
-    START([START]) --> P[profiler<br/>load + profile CSV]
-    P --> PL[planner<br/>reason → route]
-    PL -- clarify --> C[clarifier<br/>ask questions]
-    PL -- analyze --> CG[codegen<br/>write + execute code]
-    PL -- finish --> I[insight<br/>synthesize]
-    C --> E1([END: await user])
-    CG -- critic: insufficient --> CG
-    CG -- critic: sufficient --> I
-    I --> E2([END])
-```
-
-**Agents / tools**
-
-| Component | Role |
-| --- | --- |
-| `profiler` | Tool: loads + profiles the CSV (shape, dtypes, nulls, summary). |
-| `planner` | Reasons and routes to clarify / analyze / finish. |
-| `clarifier` | Asks up to 3 targeted clarifying questions. |
-| `codegen` | Generates pandas/matplotlib code, runs it via the **execution tool**, then self-critiques. |
-| `insight` | Synthesizes final insights + caveats from executed output. |
-
-Two real tool/function calls are used: **CSV profiling** and **sandboxed code
-execution**.
-
-## Advanced techniques demonstrated
-
-- **Multi-agent collaboration** — planner delegates to specialists.
-- **Self-reflection / self-critique** — a critic judges each analysis and can
-  trigger another attempt.
-- **Chain-of-thought** prompting in the planner and few-shot examples for code
-  generation.
-- **Structured output** — every agent hand-off is a typed Pydantic model.
-
-## Robustness & guardrails
-
-- LLM calls wrapped with **retries (tenacity), timeouts, and fallbacks**.
-- **Input validation** on the CSV (existence, size limit, parse errors, empty).
-- **Token-budget guardrail** truncates oversized prompts.
-- **Code guardrails**: an AST scan blocks dangerous imports from a denylist,
-  plus a wall-clock execution timeout. (See `wikis/` for the sandbox tradeoff.)
-- **Full reasoning trace**: every step is logged and captured as JSON.
-
-## Project structure
-
-```
-src/
-  agent.py                 # CLI entrypoint (assignment spec)
-  evaluate.py              # evaluation runner (assignment spec)
-  data_analysis_agent/
-    config.py  llm.py  logging_utils.py
-    schemas.py  state.py  memory.py  graph.py  runner.py  cli.py  evaluation.py
-    prompts/               # system prompts + few-shot
-    tools/                 # csv_tools.py, code_exec.py
-    agents/                # planner, clarifier, codegen, insight
-app/streamlit_app.py       # Streamlit UI (bonus)
-tests/scenarios.json       # evaluation scenarios + sample CSV
-wikis/                     # design decisions & rationale
-docs/agent_run_report.md   # architecture + sample trace + eval results
-Dockerfile, docker-compose.yml
-```
-
-## Setup
-
-Requires Python 3.13+.
+**Prerequisites:** Python 3.13+ and an Azure AI Foundry API key.
 
 ```bash
-pip install -r requirements.txt
-cp .env.example .env        # then edit .env and set AZURE_AI_API_KEY
-```
+# 1. Install
+pip install -r requirements.txt        # or: uv sync
 
-(Or with [uv](https://docs.astral.sh/uv/): `uv sync`.)
+# 2. Configure
+cp .env.example .env                    # then edit .env and set AZURE_AI_API_KEY
 
-### Configuration (`.env`)
-
-| Variable | Purpose | Default |
-| --- | --- | --- |
-| `AZURE_AI_API_KEY` | **Required** API key | — |
-| `DAA_LLM_BASE_URL` | OpenAI-compatible endpoint | Azure Foundry `.../models` |
-| `DAA_LLM_MODEL` | Model name | `gpt-5.4` |
-| `DAA_LLM_TEMPERATURE` | Sampling temperature | `0.1` |
-| `DAA_LLM_TIMEOUT` / `DAA_LLM_MAX_RETRIES` | Resilience | `60` / `3` |
-| `DAA_MAX_INPUT_TOKENS` | Prompt token budget | `100000` |
-| `DAA_CODE_TIMEOUT` | Generated-code timeout (s) | `30` |
-
-## Run
-
-```bash
-# One-shot analysis (auto-proceed past clarifications)
+# 3. Ask a question
 python src/agent.py --csv tests/data/sales.csv \
-  --query "Which region has the highest total order_value?" --no-clarify
-
-# Let the agent ask clarifying questions, then resume on the same thread
-python src/agent.py --csv tests/data/sales.csv --query "Show me the best performance."
-python src/agent.py --csv tests/data/sales.csv --query "Show me the best performance." \
-  --thread-id <printed-thread-id> --clarifications "Total order_value by region."
-
-# Show the full JSON reasoning trace
-python src/agent.py --csv tests/data/sales.csv --query "..." --no-clarify --json-trace
+  --query "Which region has the highest total order_value?"
 ```
 
-### Streamlit UI (bonus)
+Prefer a UI? Launch the web app:
 
 ```bash
-streamlit run app/streamlit_app.py
+streamlit run app/streamlit_app.py      # http://localhost:8501
 ```
 
-### Docker (bonus)
+Or run it in a container:
 
 ```bash
-docker compose up --build          # serves the UI on http://localhost:8501
+docker compose up --build               # http://localhost:8501
 ```
+
+## How it works (at a glance)
+
+A small team of specialist agents, coordinated by a planner, running a
+`reason → plan → act → observe → respond` loop:
+
+```
+profiler → planner → ┬─ clarifier  (ask questions)
+                     ├─ codegen    (write + run code, self-critique) ⟲
+                     └─ insight     (summarize findings)
+```
+
+📖 **Want the full picture?** See the [Architecture deep-dive](docs/architecture.md).
+
+## Opinionated choices
+
+This project makes a few deliberate choices to stay simple and fast. All of them
+are swappable — see [Design Decisions](wikis/design-decisions.md) for the full
+rationale and trade-offs.
+
+| Area | Choice |
+| --- | --- |
+| Agent framework | **LangGraph + LangChain** |
+| LLM provider | **Azure AI Foundry** (any OpenAI-compatible endpoint works) |
+| Memory / persistence | **SQLite** checkpointer (per conversation thread) |
+| Code execution | **In-process sandbox** with guardrails ⚠️ *not* for untrusted input |
+| Dependencies | **uv** (with a `requirements.txt` fallback) |
+
+## Usage tips
+
+```bash
+# Let the agent ask clarifying questions first, then resume on the same thread:
+python src/agent.py --csv <file.csv> --query "Show me the best performance."
+python src/agent.py --csv <file.csv> --query "Show me the best performance." \
+  --thread-id <printed-id> --clarifications "Total order_value by region."
+
+# Skip clarifying questions and see the full JSON reasoning trace:
+python src/agent.py --csv <file.csv> --query "..." --no-clarify --json-trace
+```
+
+Configuration (model, temperature, timeouts, guardrail limits) is set via `.env`
+— see the [full reference](docs/architecture.md#configuration-reference).
 
 ## Evaluation
 
@@ -142,15 +100,19 @@ docker compose up --build          # serves the UI on http://localhost:8501
 python src/evaluate.py --scenarios tests/scenarios.json --out eval_results.json
 ```
 
-Runs 5 representative scenarios (top region, averages by segment, best-selling
-category, monthly trend, and an ambiguous query that *should* trigger
-clarification) and scores each output against expected keywords/behaviour. See
-`docs/agent_run_report.md` for a sample run and results.
+Runs representative scenarios and scores each output against expected results.
+See the [Agent Run Report](docs/agent_run_report.md) for a sample run and results.
 
-## Bonus features
+## Documentation
 
-- ✅ Multi-agent orchestration (planner → specialists)
-- ✅ Memory / conversation persistence (SQLite checkpointer per `thread_id`)
-- ✅ Streaming responses (CLI + UI stream each agent step)
-- ✅ Containerized deployment (Dockerfile + docker-compose)
-- ✅ Simple UI (Streamlit)
+| Doc | What's inside |
+| --- | --- |
+| [Architecture deep-dive](docs/architecture.md) | Agent loop, tools, techniques, config, project layout |
+| [Design Decisions](wikis/design-decisions.md) | Why each choice was made + trade-offs |
+| [Agent Run Report](docs/agent_run_report.md) | Sample trace, clarification flow, evaluation results |
+
+## Features
+
+Multi-agent orchestration · conversation memory · streaming responses ·
+Streamlit UI · Docker deployment · structured (Pydantic) outputs · retries,
+timeouts & guardrails · full reasoning trace.
