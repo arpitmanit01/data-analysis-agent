@@ -8,7 +8,7 @@
 
 # Data Analysis Agent
 
-**Chat with your CSV.** Ask a question in plain English — the agent profiles your
+**Chat with your CSV.** Ask a question in plain English. The agent profiles your
 data, asks for clarification when needed, writes and runs the analysis code, and
 hands back clear, data-grounded insights.
 
@@ -18,10 +18,10 @@ hands back clear, data-grounded insights.
 
 ## What it does
 
-- 📊 **Upload a CSV, ask a question** — no SQL or pandas required.
+- 📊 **Upload a CSV, ask a question.** No SQL or pandas required.
 - 🤔 **Asks smart clarifying questions** when your request is ambiguous.
 - 🧑‍💻 **Writes and executes analysis code** for you, then double-checks its own work.
-- 💡 **Returns insights, caveats, and charts** — not just raw numbers.
+- 💡 **Returns insights, caveats, and charts**, not just raw numbers.
 - 🖥️ **CLI or web UI**, with a live view of the agent's reasoning.
 
 ## Quickstart
@@ -68,7 +68,7 @@ profiler → planner → ┬─ clarifier  (ask questions)
 ## Opinionated choices
 
 This project makes a few deliberate choices to stay simple and fast. All of them
-are swappable — see [Design Decisions](wikis/design-decisions.md) for the full
+are swappable. See [Design Decisions](wikis/design-decisions.md) for the full
 rationale and trade-offs.
 
 | Area | Choice |
@@ -91,8 +91,8 @@ python src/agent.py --csv <file.csv> --query "Show me the best performance." \
 python src/agent.py --csv <file.csv> --query "..." --no-clarify --json-trace
 ```
 
-Configuration (model, temperature, timeouts, guardrail limits) is set via `.env`
-— see the [full reference](docs/architecture.md#configuration-reference).
+Configuration (model, temperature, timeouts, guardrail limits) is set via `.env`.
+See the [full reference](docs/architecture.md#configuration-reference).
 
 ## Evaluation
 
