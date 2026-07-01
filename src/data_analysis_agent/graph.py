@@ -1,11 +1,11 @@
 """LangGraph orchestration: wires specialist agents into the agent loop.
 
-Flow (reason -> plan -> act -> observe -> respond):
+Flow (reason -> plan -> act -> observe -> respond)::
 
     profiler -> planner --clarify--> clarifier -> (interrupt / END)
-                       \--analyze--> codegen --retry--> codegen
-                       |                    \--synthesize--> insight -> END
-                       \--finish---> insight -> END
+                       \\--analyze--> codegen --retry--> codegen
+                       |                    \\--synthesize--> insight -> END
+                       \\--finish---> insight -> END
 """
 
 from __future__ import annotations

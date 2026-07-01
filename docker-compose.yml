@@ -1,0 +1,13 @@
+services:
+  data-analysis-agent:
+    build: .
+    image: data-analysis-agent:latest
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      # Persist conversation memory and generated artifacts on the host.
+      - ./.agent_memory.sqlite3:/app/.agent_memory.sqlite3
+      - ./artifacts:/app/artifacts
+    restart: unless-stopped
