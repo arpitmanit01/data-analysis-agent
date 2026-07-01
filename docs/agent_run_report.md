@@ -129,11 +129,21 @@ Defined in `tests/scenarios.json` (run: `python src/evaluate.py`):
 Scoring is transparent: fraction of expected keywords present, substring checks,
 and correct clarify behaviour; a scenario passes at score ≥ its threshold.
 
-> Note: scenario runs require a valid `AZURE_AI_API_KEY`. Observed manual runs of
-> the analytical scenarios and the clarification scenario behaved as expected
-> (correct top region = North, correct segment ordering, and the ambiguous query
-> triggered clarification). Reproduce with the command above and save machine
-> results via `--out eval_results.json`.
+**Result of a live run** (`gpt-5.4`):
+
+```
+=== Evaluation Report ===
+  [PASS] top_region_by_revenue (score=1.0)
+  [PASS] avg_order_value_by_segment (score=1.0)
+  [PASS] best_selling_category_by_quantity (score=1.0)
+  [PASS] monthly_revenue_trend (score=1.0)
+  [PASS] ambiguous_needs_clarification (score=1.0)
+
+5/5 scenarios passed (pass_rate=1.0)
+```
+
+> Scenario runs require a valid `AZURE_AI_API_KEY`. Reproduce with
+> `python src/evaluate.py --scenarios tests/scenarios.json --out eval_results.json`.
 
 ## 5. Design decisions & trade-offs (summary)
 
