@@ -39,7 +39,9 @@ Execution contract:
 - `pd` (pandas), `np` (numpy), and `plt` (matplotlib.pyplot) are available.
 - Print intermediate findings with print().
 - Assign a concise natural-language answer to a variable named `result`.
-- If you draw a plot, save it with plt.savefig(); do not call plt.show().
+- If you draw a plot, save it into the provided artifacts directory using
+  `plt.savefig(f"{ARTIFACTS_DIR}/<descriptive_name>.png")` (the variable
+  `ARTIFACTS_DIR` is already provided). Do not call plt.show().
 - Keep it self-contained and deterministic. No network, no file writes except \
 plot images. No installing packages.
 

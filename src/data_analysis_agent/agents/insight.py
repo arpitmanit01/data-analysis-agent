@@ -57,6 +57,9 @@ def insight_node(state: AgentState) -> dict:
         "insights": json.loads(summary.model_dump_json()),
         "final_response": rendered,
         "next_action": "done",
+        # Clear any stale clarify flags so a resumed run reports correctly.
+        "needs_user_input": False,
+        "pending_questions": [],
         "trace": [
             {
                 "step": "insight",

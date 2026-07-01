@@ -38,7 +38,7 @@ def planner_node(state: AgentState) -> dict:
         if decision.next_action == "clarify" and clarifications:
             decision.next_action = "analyze"
 
-    return {
+    result: dict = {
         "next_action": decision.next_action,
         "trace": [
             {
@@ -49,3 +49,8 @@ def planner_node(state: AgentState) -> dict:
             }
         ],
     }
+    # Clear stale clarify flags once we move past clarification.
+    if decision.next_action != "clarify":
+        result["needs_user_input"] = False
+        result["pending_questions"] = []
+    return result
