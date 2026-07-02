@@ -16,7 +16,8 @@ _SRC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 if _SRC not in sys.path:
     sys.path.insert(0, _SRC)
 
-from data_analysis_agent.config import get_settings  # noqa: E402
+from data_analysis_agent.config import config_error_message, get_settings  # noqa: E402
+from data_analysis_agent.llm import LLMConfigurationError  # noqa: E402
 from data_analysis_agent.runner import DataAnalysisAgent  # noqa: E402
 
 st.set_page_config(page_title="Data Analysis Agent", page_icon="📊", layout="wide")
@@ -24,8 +25,14 @@ st.title("📊 Data Analysis Agent")
 st.caption("Upload a CSV, ask a question, and watch the agent reason, code, and analyze.")
 
 settings = get_settings()
-if not settings.has_api_key:
-    st.error("No API key found. Copy `.env.example` to `.env` and set AZURE_AI_API_KEY.")
+_config_error = config_error_message(settings)
+if _config_error:
+    st.error(_config_error)
+    st.info(
+        "The app cannot reach the LLM until this is fixed. Set your key in a "
+        "`.env` file (copy `.env.example`), or pass it as an environment "
+        "variable, then reload this page."
+    )
     st.stop()
 
 
@@ -69,23 +76,34 @@ if run:
     trace_box = st.container()
     final: dict = {}
 
-    with st.spinner("Agent working..."):
-        for node_name, output in agent.stream(
-            csv_path,
-            query,
-            thread_id=st.session_state.thread_id,
-            clarifications=clarifications or "(Proceed with best assumptions.)"
-            if not clarifications
-            else clarifications,
-        ):
-            for event in output.get("trace", []):
-                trace_box.markdown(
-                    f"**[{event['phase']}] {event['step']}** — {event['detail']}"
-                )
-                if event["step"] == "codegen" and event["data"].get("code"):
-                    with trace_box.expander("Generated code"):
-                        st.code(event["data"]["code"], language="python")
-            final.update(output)
+    try:
+        with st.spinner("Agent working..."):
+            for node_name, output in agent.stream(
+                csv_path,
+                query,
+                thread_id=st.session_state.thread_id,
+                clarifications=clarifications or "(Proceed with best assumptions.)"
+                if not clarifications
+                else clarifications,
+            ):
+                for event in output.get("trace", []):
+                    trace_box.markdown(
+                        f"**[{event['phase']}] {event['step']}** — {event['detail']}"
+                    )
+                    if event["step"] == "codegen" and event["data"].get("code"):
+                        with trace_box.expander("Generated code"):
+                            st.code(event["data"]["code"], language="python")
+                final.update(output)
+    except LLMConfigurationError as exc:
+        st.error(str(exc))
+        st.stop()
+    except Exception as exc:  # noqa: BLE001 - surface a friendly message, no traceback
+        st.error(f"The analysis could not be completed: {exc}")
+        st.info(
+            "This is often caused by an invalid or expired API key, or the LLM "
+            "endpoint being unreachable. Check your `.env` settings and try again."
+        )
+        st.stop()
 
     if final.get("needs_user_input"):
         st.warning("The agent needs clarification:")
