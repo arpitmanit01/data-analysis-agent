@@ -44,7 +44,6 @@ Pick the way that suits you:
 - [Option B: CLI (uv)](#option-b-cli-with-uv)
 - [Option C: Streamlit UI (local code)](#option-c-streamlit-ui-local-code)
 - [Option D: Docker (local build and run)](#option-d-docker-local-build-and-run)
-- [Option E: Hosted Docker image](#option-e-hosted-docker-image) (coming soon)
 
 ### Option A: CLI with pip
 
@@ -106,15 +105,6 @@ docker run --rm --env-file .env data-analysis-agent:latest \
   python src/agent.py --csv tests/data/sales.csv \
   --query "Which region has the highest total order_value?"
 ```
-
-### Option E: Hosted Docker image
-
-> 🚧 **Coming soon.** A prebuilt image will be published to a public registry so
-> you can run the agent without building locally. Once available, it will look like:
->
-> ```bash
-> docker run --rm -p 8501:8501 --env-file .env <registry>/data-analysis-agent:latest
-> ```
 
 ## How it works (at a glance)
 
