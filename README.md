@@ -12,6 +12,8 @@
 data, asks for clarification when needed, writes and runs the analysis code, and
 hands back clear, data-grounded insights.
 
+**[▶️ Watch a 2-minute demo](https://drive.google.com/file/d/19M7MGiz8zS1Y993iGFlpa-s7ktSMA6LK/view?usp=sharing)**
+
 </div>
 
 ---
