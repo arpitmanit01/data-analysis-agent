@@ -12,6 +12,8 @@
 data, asks for clarification when needed, writes and runs the analysis code, and
 hands back clear, data-grounded insights.
 
+**[▶️ Watch a 2-minute demo](https://drive.google.com/file/d/19M7MGiz8zS1Y993iGFlpa-s7ktSMA6LK/view?usp=sharing)**
+
 </div>
 
 ---
@@ -28,28 +30,82 @@ hands back clear, data-grounded insights.
 
 **Prerequisites:** Python 3.13+ and an Azure AI Foundry API key.
 
+**First, configure your key** (needed by every run method below):
+
 ```bash
-# 1. Install
-pip install -r requirements.txt        # or: uv sync
+cp .env.example .env                     # then edit .env and set AZURE_AI_API_KEY
+```
 
-# 2. Configure
-cp .env.example .env                    # then edit .env and set AZURE_AI_API_KEY
+The repo ships with a sample dataset at `tests/data/sales.csv` (columns:
+`order_id, order_date, region, category, quantity, unit_price, order_value,
+customer_segment`). Every option below includes a ready to run example against it.
 
-# 3. Ask a question
+Pick the way that suits you:
+
+- [Option A: CLI (pip)](#option-a-cli-with-pip)
+- [Option B: CLI (uv)](#option-b-cli-with-uv)
+- [Option C: Streamlit UI (local code)](#option-c-streamlit-ui-local-code)
+- [Option D: Docker (local build and run)](#option-d-docker-local-build-and-run)
+
+### Option A: CLI with pip
+
+```bash
+# 1. Install into your environment (a virtualenv is recommended)
+pip install -r requirements.txt
+
+# 2. Run the bundled example
 python src/agent.py --csv tests/data/sales.csv \
   --query "Which region has the highest total order_value?"
 ```
 
-Prefer a UI? Launch the web app:
+### Option B: CLI with uv
+
+[uv](https://docs.astral.sh/uv/) manages the virtualenv and dependencies for you.
 
 ```bash
-streamlit run app/streamlit_app.py      # http://localhost:8501
+# 1. Install (creates .venv and resolves from uv.lock)
+uv sync
+
+# 2. Run the bundled example
+uv run python src/agent.py --csv tests/data/sales.csv \
+  --query "Which region has the highest total order_value?"
 ```
 
-Or run it in a container:
+### Option C: Streamlit UI (local code)
+
+Runs the web UI straight from the source. Use whichever installer you set up above.
 
 ```bash
-docker compose up --build               # http://localhost:8501
+streamlit run app/streamlit_app.py       # http://localhost:8501
+# with uv:
+uv run streamlit run app/streamlit_app.py
+```
+
+**Try the example:** open http://localhost:8501, upload `tests/data/sales.csv`,
+and ask *"Which region has the highest total order_value?"*.
+
+### Option D: Docker (local build and run)
+
+Builds the image from this repo and runs it in a container. Requires Docker.
+
+**Web UI (default):**
+
+```bash
+docker compose up --build                # http://localhost:8501
+```
+
+Then upload `tests/data/sales.csv` in the browser, as in Option C.
+
+**CLI (one-off run of the example):**
+
+```bash
+# Build the image once
+docker build -t data-analysis-agent:latest .
+
+# Run the bundled example (the CSV is baked into the image under tests/data/)
+docker run --rm --env-file .env data-analysis-agent:latest \
+  python src/agent.py --csv tests/data/sales.csv \
+  --query "Which region has the highest total order_value?"
 ```
 
 ## How it works (at a glance)

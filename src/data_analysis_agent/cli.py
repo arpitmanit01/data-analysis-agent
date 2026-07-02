@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from .config import get_settings
+from .config import config_error_message, get_settings
 from .llm import LLMConfigurationError
 from .runner import DataAnalysisAgent
 
@@ -58,12 +58,9 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     settings = get_settings()
 
-    if not settings.has_api_key:
-        print(
-            "ERROR: No API key found. Copy .env.example to .env and set "
-            "AZURE_AI_API_KEY.",
-            file=sys.stderr,
-        )
+    config_error = config_error_message(settings)
+    if config_error:
+        print(f"ERROR: {config_error}", file=sys.stderr)
         return 2
 
     _print_header(settings)

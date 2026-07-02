@@ -26,7 +26,7 @@ from tenacity import (
     wait_exponential,
 )
 
-from .config import Settings, get_settings
+from .config import Settings, config_error_message, get_settings
 from .logging_utils import get_logger
 
 _log = get_logger()
@@ -42,11 +42,9 @@ class LLMConfigurationError(RuntimeError):
 def get_llm(settings: Settings | None = None) -> ChatOpenAI:
     """Construct the chat model. Cached so the client is reused."""
     settings = settings or get_settings()
-    if not settings.has_api_key:
-        raise LLMConfigurationError(
-            "No API key found. Set AZURE_AI_API_KEY in your .env "
-            "(copy .env.example to .env)."
-        )
+    config_error = config_error_message(settings)
+    if config_error:
+        raise LLMConfigurationError(config_error)
     return ChatOpenAI(
         api_key=settings.api_key,
         base_url=settings.base_url,

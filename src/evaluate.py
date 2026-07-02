@@ -9,7 +9,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from data_analysis_agent.config import get_settings  # noqa: E402
+from data_analysis_agent.config import config_error_message  # noqa: E402
 from data_analysis_agent.evaluation import print_report, run_evaluation  # noqa: E402
 
 
@@ -23,8 +23,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default=None, help="Optional path to save JSON report.")
     args = parser.parse_args(argv)
 
-    if not get_settings().has_api_key:
-        print("ERROR: set AZURE_AI_API_KEY in .env to run evaluation.", file=sys.stderr)
+    config_error = config_error_message()
+    if config_error:
+        print(f"ERROR: {config_error}", file=sys.stderr)
         return 2
 
     report = run_evaluation(os.path.abspath(args.scenarios))
